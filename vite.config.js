@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Inventar Kalkulator',
-        short_name: 'Inventar',
-        description: 'Bestand erfassen, exportieren & Rezepte entdecken',
+        name: 'Dienstplan Generator',
+        short_name: 'Dienstplan',
+        description: 'Mitarbeiter verwalten, Schichten planen, Plaene generieren',
         theme_color: '#0d1117',
         background_color: '#0d1117',
         display: 'standalone',
@@ -38,7 +38,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        suppressWarnings: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
