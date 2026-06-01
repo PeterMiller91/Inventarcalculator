@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import WhatsAppVoice from "./WhatsAppVoice";
 
 /* ── Persistent Storage Hook ── */
 function useLocalStorage(key, initialValue) {
@@ -27,6 +28,7 @@ export default function App() {
   const [apiKey, setApiKey] = useLocalStorage("inventar-apikey", "");
   const [showSettings, setShowSettings] = useState(false);
   const [keyInput, setKeyInput] = useState("");
+  const [activeTab, setActiveTab] = useLocalStorage("active-tab", "inventar");
   const inputRef = useRef(null);
   const exportRef = useRef(null);
 
@@ -177,18 +179,45 @@ export default function App() {
         {/* Header */}
         <div style={S.header}>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
-            <h1 style={S.title}>Inventar</h1>
-            <button
-              style={S.settingsBtn}
-              onClick={() => { setKeyInput(apiKey); setShowSettings(!showSettings); }}
-              title="Einstellungen"
-            >⚙</button>
+            <h1 style={S.title}>{activeTab === "voice" ? "Sprachnachricht" : "Inventar"}</h1>
+            {activeTab === "inventar" && (
+              <button
+                style={S.settingsBtn}
+                onClick={() => { setKeyInput(apiKey); setShowSettings(!showSettings); }}
+                title="Einstellungen"
+              >⚙</button>
+            )}
           </div>
-          <p style={S.subtitle}>Bestand erfassen · Rezepte entdecken</p>
+          <p style={S.subtitle}>
+            {activeTab === "voice" ? "Transkribieren · Zusammenfassen" : "Bestand erfassen · Rezepte entdecken"}
+          </p>
+          {/* Tab Navigation */}
+          <div style={S.tabBar}>
+            <button
+              style={S.tabBtn(activeTab === "inventar")}
+              onClick={() => setActiveTab("inventar")}
+            >
+              📦 Inventar
+            </button>
+            <button
+              style={S.tabBtn(activeTab === "voice")}
+              onClick={() => setActiveTab("voice")}
+            >
+              🎙️ Sprachnachricht
+            </button>
+          </div>
         </div>
 
+        {/* Voice Tab */}
+        {activeTab === "voice" && (
+          <WhatsAppVoice
+            anthropicKey={apiKey}
+            onNeedAnthropicKey={() => { setActiveTab("inventar"); setKeyInput(apiKey); setShowSettings(true); }}
+          />
+        )}
+
         {/* Settings Panel */}
-        {showSettings && (
+        {activeTab === "inventar" && showSettings && (
           <div style={S.settingsPanel}>
             <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 10 }}>
               <strong style={{ color: "#e2e8f0" }}>API-Key Einstellung</strong><br />
@@ -211,6 +240,9 @@ export default function App() {
             {apiKey && <div style={{ fontSize: 11, color: "#4ade80", marginTop: 8 }}>✓ API-Key gespeichert</div>}
           </div>
         )}
+
+        {/* Inventar Content */}
+        {activeTab === "inventar" && <>
 
         {/* Input */}
         <div style={S.inputRow}>
@@ -300,6 +332,8 @@ export default function App() {
           </div>
         )}
 
+        </>}
+
         <div style={{ textAlign: "center", marginTop: 40, fontSize: 11, color: "#334155" }}>
           Inventar Kalkulator v1.0 · PWA
         </div>
@@ -350,6 +384,21 @@ const S = {
     letterSpacing: "-0.02em", margin: 0,
   },
   subtitle: { fontSize: 13, color: "#64748b", marginTop: 6, fontWeight: 300, letterSpacing: "0.08em", textTransform: "uppercase" },
+  tabBar: {
+    display: "flex", gap: 8, justifyContent: "center", marginTop: 20,
+  },
+  tabBtn: (active) => ({
+    padding: "9px 18px", borderRadius: 10,
+    border: active ? "none" : "1px solid rgba(148,163,184,0.15)",
+    background: active
+      ? "linear-gradient(135deg, #3b82f6, #2563eb)"
+      : "rgba(255,255,255,0.04)",
+    color: active ? "#fff" : "#64748b",
+    fontSize: 14, fontWeight: active ? 600 : 400,
+    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+    boxShadow: active ? "0 4px 14px rgba(37,99,235,0.3)" : "none",
+    transition: "all 0.2s ease",
+  }),
   settingsBtn: {
     width: 32, height: 32, borderRadius: 8, border: "1px solid rgba(148,163,184,0.15)",
     background: "rgba(255,255,255,0.04)", color: "#64748b", fontSize: 16,
